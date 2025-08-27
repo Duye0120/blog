@@ -1,0 +1,233 @@
+---
+title: "React 开发最佳实践"
+date: "2025-01-26"
+excerpt: "分享我在 React 开发中总结的一些最佳实践，包括组件设计、状态管理和性能优化。"
+tags: ["React", "JavaScript", "最佳实践", "性能优化"]
+author: "博主"
+published: true
+---
+
+import { Callout } from '@/components/Callout'
+
+# React 开发最佳实践
+
+在日常 React 开发中，我总结了一些实用的最佳实践，希望能帮助大家写出更优雅、可维护的代码。
+
+## 1. 组件设计原则
+
+### 单一职责原则
+
+每个组件应该只负责一个功能：
+
+```typescript
+// ❌ 不好的做法
+function UserProfilePage() {
+  return (
+    <div>
+      <nav>...</nav>
+      <div>用户头像和信息</div>
+      <div>用户发布的文章列表</div>
+      <footer>...</footer>
+    </div>
+  )
+}
+
+// ✅ 好的做法
+function UserProfilePage() {
+  return (
+    <Layout>
+      <UserProfile />
+      <UserPosts />
+    </Layout>
+  )
+}
+```
+
+### 使用 TypeScript 定义 Props
+
+```typescript
+interface ButtonProps {
+  children: React.ReactNode
+  variant?: 'primary' | 'secondary' | 'danger'
+  size?: 'small' | 'medium' | 'large'
+  onClick?: () => void
+  disabled?: boolean
+}
+
+function Button({ 
+  children, 
+  variant = 'primary', 
+  size = 'medium',
+  onClick,
+  disabled = false
+}: ButtonProps) {
+  return (
+    <button
+      className={`btn btn-${variant} btn-${size}`}
+      onClick={onClick}
+      disabled={disabled}
+    >
+      {children}
+    </button>
+  )
+}
+```
+
+## 2. 状态管理
+
+<Callout type="info">
+优先使用本地状态，只有在需要跨组件共享时才考虑全局状态管理。
+</Callout>
+
+### 合理使用 useState
+
+```typescript
+// ❌ 多个相关状态
+const [loading, setLoading] = useState(false)
+const [error, setError] = useState<string | null>(null)
+const [data, setData] = useState(null)
+
+// ✅ 使用 useReducer 管理复杂状态
+type State = {
+  loading: boolean
+  error: string | null
+  data: any
+}
+
+type Action = 
+  | { type: 'LOADING' }
+  | { type: 'SUCCESS', payload: any }
+  | { type: 'ERROR', payload: string }
+
+function dataReducer(state: State, action: Action): State {
+  switch (action.type) {
+    case 'LOADING':
+      return { ...state, loading: true, error: null }
+    case 'SUCCESS':
+      return { ...state, loading: false, data: action.payload }
+    case 'ERROR':
+      return { ...state, loading: false, error: action.payload }
+    default:
+      return state
+  }
+}
+```
+
+### 自定义 Hooks
+
+将逻辑抽象到自定义 hooks 中：
+
+```typescript
+function useApi<T>(url: string) {
+  const [state, dispatch] = useReducer(dataReducer, {
+    loading: true,
+    error: null,
+    data: null
+  })
+
+  useEffect(() => {
+    async function fetchData() {
+      dispatch({ type: 'LOADING' })
+      try {
+        const response = await fetch(url)
+        const data = await response.json()
+        dispatch({ type: 'SUCCESS', payload: data })
+      } catch (error) {
+        dispatch({ type: 'ERROR', payload: error.message })
+      }
+    }
+    
+    fetchData()
+  }, [url])
+
+  return state
+}
+```
+
+## 3. 性能优化
+
+### 使用 memo 避免不必要的重渲染
+
+```typescript
+const ExpensiveComponent = memo(({ data }: { data: any[] }) => {
+  const processedData = useMemo(() => {
+    return data.map(item => ({
+      ...item,
+      processed: true
+    }))
+  }, [data])
+
+  return (
+    <div>
+      {processedData.map(item => (
+        <div key={item.id}>{item.name}</div>
+      ))}
+    </div>
+  )
+})
+```
+
+### 懒加载组件
+
+```typescript
+import { lazy, Suspense } from 'react'
+
+const HeavyComponent = lazy(() => import('./HeavyComponent'))
+
+function App() {
+  return (
+    <Suspense fallback={<div>加载中...</div>}>
+      <HeavyComponent />
+    </Suspense>
+  )
+}
+```
+
+## 4. 错误处理
+
+<Callout type="warning">
+始终为您的应用添加错误边界，优雅地处理组件错误。
+</Callout>
+
+```typescript
+class ErrorBoundary extends Component<
+  { children: ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: ReactNode }) {
+    super(props)
+    this.state = { hasError: false }
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true }
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('错误详情:', error, errorInfo)
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <h1>出现了错误，请刷新页面重试。</h1>
+    }
+
+    return this.props.children
+  }
+}
+```
+
+## 总结
+
+这些最佳实践可以帮助我们：
+
+1. 写出更可维护的代码
+2. 提升应用性能
+3. 减少 bug 的产生
+4. 提升开发体验
+
+记住，最佳实践并非一成不变，要根据实际项目需求灵活运用。
+
+<Callout type="success">
+持续学习和实践是成为更好的 React 开发者的关键！
+</Callout>
