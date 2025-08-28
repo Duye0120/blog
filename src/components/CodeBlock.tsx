@@ -14,7 +14,7 @@ export default async function CodeBlock({ code, lang }: CodeBlockProps) {
   })
 
   return (
-    <div className="not-prose overflow-x-auto rounded-lg border border-gray-800/50 shadow-sm">
+    <div className="not-prose overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800 shadow-sm my-4">
       <div
         className="[&_pre]:m-0 [&_pre]:p-4 [&_code]:text-sm"
         dangerouslySetInnerHTML={{ __html: html }}

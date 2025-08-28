@@ -24,7 +24,7 @@ export function Layout({ children }: LayoutProps) {
        supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-gray-950/50 bg-white/80 dark:bg-gray-950/80 backdrop-blur">
         <div className="w-full flex items-center justify-between">
           <Link href="/">
-            <span className="text-gray-900 dark:text-gray-100 font-semibold cursor-pointer" >Try2Realx</span>
+            <span className="text-gray-500 dark:text-gray-100 font-semibold cursor-pointer" >Try2Realx</span>
           </Link>
           <div className="flex  items-center justify-end">
             <div className="flex items-center gap-4">

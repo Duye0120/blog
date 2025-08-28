@@ -11,14 +11,44 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Architecture
 
-This is a Next.js 15 blog application using the App Router pattern with TypeScript and MDX for content management.
+This is a Next.js 15 blog application using the App Router pattern with TypeScript and Notion as the content management system.
 
 ### Key Technologies
 - **Next.js 15** with App Router and Turbopack
 - **TypeScript** for type safety
-- **MDX** for blog content (markdown with JSX components)
+- **Notion API** for content management via `@notionhq/client` and `react-notion-x`
 - **Tailwind CSS v4** with typography plugin for styling
-- **Gray Matter** for frontmatter parsing
+- **react-notion-x** for rendering Notion content with full block support
+
+### Content Architecture
+
+The blog uses Notion as a headless CMS with a dual-API approach:
+
+1. **Official Notion SDK** (`@notionhq/client`) - Used for querying the database to get post lists and metadata
+2. **Unofficial Notion API** (`notion-client`) - Used to fetch full page content as ExtendedRecordMap for rendering
+
+### Core Data Flow
+
+```
+Notion Database → getNotionPosts() → Home page listing
+Notion Page → getPageIdBySlug() → getRecordMapByPageId() → NotionContent rendering
+```
+
+Key functions in `src/lib/notion.ts`:
+- `getNotionPosts()` - Fetches published posts from Notion database for homepage
+- `getPageIdBySlug(slug)` - Maps URL slug to Notion page ID
+- `getRecordMapByPageId(pageId)` - Fetches full page content for rendering
+- `getPageMetaById(pageId)` - Gets page metadata for SEO
+
+### Notion Database Schema
+
+Expected properties in the Notion database:
+- **slug** (Rich Text) - URL slug for the post
+- **Name** or **title** (Title) - Post title
+- **date** (Date) - Publication date
+- **tags** (Multi-select) - Post tags/categories
+- **status** (Select) - Must be "Published" to appear on site
+- **readTime** (Number, optional) - Reading time in minutes
 
 ### Directory Structure
 
@@ -26,50 +56,35 @@ This is a Next.js 15 blog application using the App Router pattern with TypeScri
 src/
 ├── app/                    # Next.js App Router pages
 │   ├── layout.tsx         # Root layout with metadata and fonts
-│   ├── page.tsx           # Home page (lists all posts)
+│   ├── page.tsx           # Home page (fetches posts from Notion)
 │   ├── about/             # About page
 │   └── posts/[slug]/      # Dynamic blog post pages
 ├── components/            # React components
 │   ├── Layout.tsx         # Main page layout wrapper
 │   ├── HomeContent.tsx    # Home page content component
-│   ├── PostCard.tsx       # Blog post preview cards
-│   ├── Callout.tsx        # MDX callout component
+│   ├── NotionContent.tsx  # Notion page renderer wrapper
 │   └── ...               # Other UI components
 ├── lib/
-│   └── blog.ts           # Blog utilities (getAllPosts, getPostBySlug)
+│   └── notion.ts         # Notion API utilities and data fetching
 └── types/
     └── blog.ts           # TypeScript interfaces
-
-posts/                    # MDX blog posts directory
-mdx-components.tsx       # Global MDX component configuration
 ```
 
-### Blog Post System
+### Environment Variables
 
-Blog posts are `.mdx` files in the `posts/` directory with frontmatter:
+Required for Notion integration:
+- `NOTION_TOKEN` - Notion integration token with read access
+- `NOTION_DATABASE_ID` - ID of the Notion database containing blog posts
 
-```yaml
----
-title: "Post Title"
-date: "2025-01-27"
-excerpt: "Post summary"
-tags: ["tag1", "tag2"]
-author: "Author Name"
-published: true
----
-```
+### Content Rendering
 
-Key functions in `src/lib/blog.ts`:
-- `getAllPosts()` - Returns all published posts sorted by date
-- `getPostBySlug(slug)` - Gets single post by filename slug
-- `getAllTags()` - Returns unique tags across all posts
-
-### MDX Configuration
-
-Custom MDX components are registered in `mdx-components.tsx` and include:
-- Custom styling for headings, paragraphs, code blocks
-- `Callout` component for info boxes
-- Typography optimized for readability
+The `NotionContent` component uses `react-notion-x` with these features:
+- Dynamic imports to avoid SSR issues
+- Support for code blocks with syntax highlighting
+- Math equations via KaTeX
+- PDF embedding
+- Modal support for image previews
+- Disabled full-page mode and header for embedding
 
 ### Styling System
 
@@ -77,18 +92,18 @@ Uses Tailwind CSS v4 with:
 - Custom color variables (`--background`, `--foreground`)  
 - Typography plugin with custom prose styles
 - Responsive design patterns
-- Content paths configured for all component directories and MDX files
+- Chinese language support (`lang="zh-CN"`)
 
-### Content Management
+### Performance & Caching
 
-- Posts automatically appear on home page when added to `posts/` directory
-- Reading time calculated automatically (1000 chars ≈ 1 minute)
-- Draft posts can be hidden with `published: false`
-- Tags system for categorization
+- Static generation for blog posts using Next.js App Router
+- ISR with 60-second revalidation on post pages
+- Dynamic imports for heavy Notion rendering components
+- SEO optimized with Open Graph and Twitter Card metadata
 
 ## Development Notes
 
-- Uses Geist font family (Sans and Mono variants)
-- Chinese language support (`lang="zh-CN"`)
-- SEO optimized with Open Graph and Twitter Card metadata
-- Static generation for blog posts using Next.js App Router
+- Content is managed entirely in Notion - no local files needed for posts
+- The unofficial Notion API is required for full content rendering capabilities
+- Font family: Geist (Sans and Mono variants)
+- All Notion block types are supported through react-notion-x components

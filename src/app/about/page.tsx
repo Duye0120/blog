@@ -62,7 +62,7 @@ export default function AboutPage() {
                 📝 关于这个博客
               </h2>
               <p className="text-gray-700 leading-relaxed mb-4">
-                这个博客使用 Next.js 14 + TypeScript + MDX 构建，旨在分享我的：
+                这个博客使用 Next.js 15 + TypeScript + Notion 构建，旨在分享我的：
               </p>
               <ul className="list-disc list-inside space-y-2 text-gray-700 ml-4">
                 <li>技术学习笔记和最佳实践</li>

@@ -1,9 +1,9 @@
 import { Layout } from '@/components/Layout'
-import { getAllPosts } from '@/lib/blog'
 import { HomeContent } from '@/components/HomeContent'
+import { getNotionPosts } from '@/lib/notion'
 
-export default function Home() {
-  const posts = getAllPosts()
+export default async function Home() {
+  const posts = await getNotionPosts()
 
   return (
     <Layout>

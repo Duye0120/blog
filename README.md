@@ -1,13 +1,14 @@
 # 我的个人博客
 
-这是一个使用 Next.js 14 + TypeScript + MDX 构建的现代化个人博客。
+这是一个使用 Next.js 15 + TypeScript + Notion 构建的现代化个人博客。
 
 ## 🚀 技术栈
 
-- **框架**: Next.js 14 (App Router)
+- **框架**: Next.js 15 (App Router)
 - **语言**: TypeScript
 - **样式**: Tailwind CSS + @tailwindcss/typography
-- **内容管理**: MDX (Markdown + JSX)
+- **内容管理**: Notion API
+- **渲染**: react-notion-x
 - **包管理**: npm
 - **代码质量**: ESLint
 
@@ -15,35 +16,31 @@
 
 ```
 blog/
-├── components/           # React 组件
-│   ├── Callout.tsx      # 提示框组件
-│   ├── Layout.tsx       # 页面布局
-│   └── PostCard.tsx     # 文章卡片
-├── lib/                 # 工具库
-│   └── blog.ts          # 博客文章处理
-├── posts/               # MDX 博客文章
-│   ├── welcome-to-my-blog.mdx
-│   └── react-best-practices.mdx
 ├── src/
-│   └── app/             # Next.js App Router 页面
-│       ├── page.tsx     # 首页
-│       ├── about/       # 关于页面
+│   ├── components/      # React 组件
+│   │   ├── Layout.tsx   # 页面布局
+│   │   ├── NotionContent.tsx # Notion内容渲染
+│   │   └── ...          # 其他UI组件
+│   ├── lib/            # 工具库
+│   │   └── notion.ts   # Notion API处理
+│   ├── types/          # TypeScript 类型定义
+│   │   └── blog.ts     # 博客类型
+│   └── app/            # Next.js App Router 页面
+│       ├── page.tsx    # 首页
+│       ├── about/      # 关于页面
 │       └── posts/[slug] # 动态文章页面
-├── types/               # TypeScript 类型定义
-│   └── blog.ts
-└── mdx-components.tsx   # MDX 组件配置
+└── ...
 ```
 
 ## 🎯 功能特性
 
 - ✅ 响应式设计，适配各种设备
-- ✅ 支持 MDX 格式博客文章
-- ✅ 自动生成文章列表和详情页
-- ✅ 标签系统和文章分类
+- ✅ 基于 Notion 的内容管理
+- ✅ 自动从 Notion 获取文章列表和内容
+- ✅ 支持 Notion 的所有块类型
 - ✅ SEO 友好的静态生成
 - ✅ 代码语法高亮
-- ✅ 自定义 MDX 组件支持
-- ✅ 阅读时间估算
+- ✅ 丰富的内容渲染支持
 - ✅ 优雅的排版和样式
 
 ## 🛠 开发指南
@@ -64,37 +61,21 @@ npm run dev
 
 ### 写作新文章
 
-1. 在 `posts/` 目录下创建新的 `.mdx` 文件
-2. 添加 frontmatter 元数据：
+1. 在 Notion 中创建新的页面
+2. 添加文章内容，支持所有 Notion 块类型：
+   - 文本、标题、引用
+   - 代码块、表格
+   - 图片、视频
+   - 列表、待办事项
+   - 等等...
+3. 文章会自动同步到博客网站
 
-```mdx
----
-title: "文章标题"
-date: "2025-01-27"
-excerpt: "文章摘要"
-tags: ["标签1", "标签2"]
-author: "作者"
-published: true
----
+### 配置 Notion 集成
 
-# 文章内容
-
-这里是文章正文...
-```
-
-3. 保存文件，文章会自动出现在首页
-
-### 使用自定义组件
-
-在 MDX 文件中可以使用自定义组件：
-
-```mdx
-import { Callout } from '@/components/Callout'
-
-<Callout type="info">
-这是一个信息提示框
-</Callout>
-```
+1. 创建 Notion 集成应用
+2. 获取 Integration Token
+3. 配置环境变量
+4. 设置数据库权限
 
 ## 📦 构建部署
 
@@ -122,11 +103,11 @@ npm start
 
 编辑 `tailwind.config.js` 中的颜色配置。
 
-### 添加新组件
+### 自定义渲染
 
 1. 在 `components/` 目录创建组件
-2. 在 `mdx-components.tsx` 中注册组件
-3. 在 MDX 文件中导入使用
+2. 在 `NotionContent.tsx` 中注册自定义渲染
+3. 支持自定义 Notion 块的渲染方式
 
 ### 修改布局
 
@@ -134,11 +115,11 @@ npm start
 
 ## 📝 写作技巧
 
-- 使用 frontmatter 设置文章元信息
-- 利用 MDX 的 JSX 能力嵌入交互组件
-- 合理使用标签进行文章分类
-- 编写有意义的摘要提升用户体验
-- 使用 `published: false` 隐藏草稿文章
+- 在 Notion 中直接编写，所见即所得
+- 利用 Notion 的丰富块类型创建内容
+- 使用数据库属性管理文章元信息
+- 合理使用页面结构提升阅读体验
+- 利用 Notion 的发布状态控制文章可见性
 
 ## 🤝 贡献
 
